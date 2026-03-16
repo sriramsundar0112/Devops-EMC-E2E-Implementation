@@ -85,6 +85,20 @@ pipeline{
                     sh 'docker run -d --name $LOCAL_IMAGE_NAME-V$BUILD_NUMBER -p 8081:8000 $LOCAL_IMAGE_NAME:V$BUILD_NUMBER '
                 }
             }
+
+            post
+            {
+                success
+                {
+                    emailext attachLog: true, body: '''<html>
+                                    <body>
+                                    <h1>Jenkins Build Notification: ${PROJECT_NAME} - Build #${BUILD_NUMBER}</h1>
+                                    <p>Status: <b>${BUILD_STATUS}</b></p>
+                                    <p>Check the build details here: <a href="${BUILD_URL}">${BUILD_URL}</a></p>
+                                    </body>
+                                    </html>''', mimeType: 'HTML (text/html)', subject: 'Build Notification: ${PROJECT_NAME} - Build #${BUILD_NUMBER} - Status : ${BUILD_STATUS}', to: 'sriram.sundaramoorthy@gmail.com'
+                }
+            }
     }
 
 }
