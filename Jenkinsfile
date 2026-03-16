@@ -86,7 +86,10 @@ pipeline{
                 }
             }
 
-            post
+            
+    }
+
+    post
             {
                 success
                 {
@@ -99,6 +102,5 @@ pipeline{
                                     </html>''', mimeType: 'HTML (text/html)', subject: 'Build Notification: ${PROJECT_NAME} - Build #${BUILD_NUMBER} - Status : ${BUILD_STATUS}', to: 'sriram.sundaramoorthy@gmail.com'
                 }
             }
-    }
 
 }
