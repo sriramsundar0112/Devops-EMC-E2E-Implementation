@@ -82,7 +82,7 @@ pipeline{
             {
                 steps
                 {
-                    sh 'docker run -d --name $LOCAL_IMAGE_NAMEV$BUILD_NUMBER -p 8081:8000 $LOCAL_IMAGE_NAME:V$BUILD_NUMBER '
+                    sh 'docker run -d --name $LOCAL_IMAGE_NAME-V$BUILD_NUMBER -p 8081:8000 $LOCAL_IMAGE_NAME:V$BUILD_NUMBER '
                 }
             }
     }
