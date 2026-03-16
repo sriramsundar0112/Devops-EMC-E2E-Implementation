@@ -3,22 +3,13 @@ pipeline{
     agent any
     environment
     {
-        GITHUB_URL='https://github.com/sriramsundar0112/Jenkins-Python-Docker.git'
-        GITHUB_BRANCH='main'
-        LOCAL_IMAGE_NAME='python-webapp'
+       LOCAL_IMAGE_NAME='python-webapp'
         DOCKER_HUB_REPO='jenkins-docker-python-webapp'
      
     }
 
     stages{
-        stage("Checkout")
-        {
-            steps
-            {
-                git branch:"${env.GITHUB_BRANCH}",credentialsId:'github-token',url:"${env.GITHUB_URL}"
-            }
-        }
-
+       
                 stage('SonarQube Code Analysis'){
 		steps{
             withSonarQubeEnv('sonarserver') {
