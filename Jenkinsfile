@@ -91,22 +91,18 @@ pipeline{
 
     
 post {
-  always {
-    emailext(
-      attachLog: true,
-      mimeType: 'text/html',
-      subject: 'Build Notification: ${PROJECT_NAME} - Build #${BUILD_NUMBER} - Status : ${BUILD_STATUS}',
-      to: 'sriram.sundaramoorthy@gmail.com',
-      body: '''<html>
-                  <body>
-                    <h1>Jenkins Build Notification: ${PROJECT_NAME} - Build #${BUILD_NUMBER}</h1>
-                    <p>Status: <b>${BUILD_STATUS}</b></p>
-                    <p>Check the build details here: ${BUILD_URL}${BUILD_URL}</a></p>
-                  </body>
-               </html>'''
-    )
-  }
-}
+ {
+                always
+                {
+                    emailext attachLog: true, body: '''<html>
+                                    <body>
+                                    <h1>Jenkins Build Notification: ${PROJECT_NAME} - Build #${BUILD_NUMBER}</h1>
+                                    <p>Status: <b>${BUILD_STATUS}</b></p>
+                                    <p>Check the build details here: <a href="${BUILD_URL}">${BUILD_URL}</a></p>
+                                    </body>
+                                    </html>''', mimeType: 'text/html', subject: 'Build Notification: ${PROJECT_NAME} - Build #${BUILD_NUMBER} - Status : ${BUILD_STATUS}', to: 'sriram.sundaramoorthy@gmail.com'
+                }
+            }
 
 
 }
