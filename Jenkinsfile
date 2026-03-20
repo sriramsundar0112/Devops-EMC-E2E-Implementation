@@ -86,7 +86,7 @@ pipeline{
                 {
                     sh '''
                     CONTAINER_ID=0
-                    $CONTAINER_ID= docker ps -q --filter "publish=$HOST_PORT"
+                    CONTAINER_ID= $(docker ps -q --filter "publish=$HOST_PORT")
                     if [ "$CONTAINER_ID" -ne 0];then
                         docker stop $CONTAINER_ID
                     fi
