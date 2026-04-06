@@ -26,7 +26,7 @@ pipeline{
 		steps{
             withSonarQubeEnv('sonarserver') {
                 sh '''
-                     /usr/lib/sonarscanner/bin/sonar-scanner \
+                     /opt/sonar-scanner-8.0.1.6346-linux-x64/bin/sonar-scanner \
                      -Dsonar.projectBaseDir=. \
                      -Dsonar.sources=app \
                      -Dsonar.projectKey=sonarqube-Jenkins:$BUILD_NUMBER-$BUILD_ID \
