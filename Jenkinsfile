@@ -101,7 +101,8 @@ stage('Deploy and Run Python Web Application') {
                     keyFileVariable: 'SSH_KEY',
                     usernameVariable: 'SSH_USER'
                 )
-            ]) {
+            ]) 
+            {
                 sh '''
                     set -e
 
@@ -110,7 +111,7 @@ stage('Deploy and Run Python Web Application') {
                     ssh -o StrictHostKeyChecking=no \
                         -o UserKnownHostsFile=/dev/null \
                         -i "$SSH_KEY" \
-                        $SSH_USER@$CLIENT_PRIVATEIP << EOF
+                        $SSH_USER@$CLIENT_PRIVATEIP <<EOF
 
                     hostname
 					whoami
@@ -119,7 +120,7 @@ stage('Deploy and Run Python Web Application') {
                     sudo docker pull ${IMAGE_NAME_REPO}
 
                     CONTAINER_ID=$(sudo docker ps -q --filter "publish=${HOST_PORT}")
-
+                    echo $CONTAINER_ID
                     if [ -n "$CONTAINER_ID" ]; then
                         echo "Stopping container running on port ${HOST_PORT}: $CONTAINER_ID"
                         sudo docker stop "$CONTAINER_ID"
@@ -134,7 +135,7 @@ stage('Deploy and Run Python Web Application') {
                         ${IMAGE_NAME_REPO}
 
                     echo "Deployment completed successfully."
-                EOF
+            EOF
                 '''
             }
         }
