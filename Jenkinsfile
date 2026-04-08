@@ -113,10 +113,10 @@ stage('Deploy and Run Python Web Application') {
                         $SSH_USER@$CLIENT_PRIVATEIP << 'EOF'
 
                     IMAGE="${IMAGE_NAME_REPO}"
-                    echo "Pulling image: $IMAGE"
-                    docker pull "$IMAGE"
+                    echo "Pulling image: $IMAGE_NAME_REPO"
+                    sudo docker pull "$IMAGE_NAME_REPO"
 
-                    CONTAINER_ID=$(docker ps -q --filter "publish=${HOST_PORT}")
+                    CONTAINER_ID=$(sudo docker ps -q --filter "publish=${HOST_PORT}")
 
                     if [ -n "$CONTAINER_ID" ]; then
                         echo "Stopping container running on port ${HOST_PORT}: $CONTAINER_ID"
@@ -126,7 +126,7 @@ stage('Deploy and Run Python Web Application') {
                     fi
 
                     echo "Starting new container..."
-                    docker run -d \
+                    sudo docker run -d \
                         --name ${LOCAL_IMAGE_NAME}-V${BUILD_NUMBER} \
                         -p ${HOST_PORT}:${DOCKER_PORT} \
                         "$IMAGE"
