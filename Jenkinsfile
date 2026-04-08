@@ -115,7 +115,7 @@ stage('Deploy and Run Python Web Application') {
                     hostname
 					whoami
 					pwd
-					echo "Pulling image: ${IMAGE_NAME_REPO}
+					echo "Pulling image: ${IMAGE_NAME_REPO}"
                     sudo docker pull ${IMAGE_NAME_REPO}
 
                     CONTAINER_ID=$(sudo docker ps -q --filter "publish=${HOST_PORT}")
