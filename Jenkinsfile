@@ -122,7 +122,7 @@ stage('Deploy and Run Python Web Application') {
 
                     if [ -n "$CONTAINER_ID" ]; then
                         echo "Stopping container running on port ${HOST_PORT}: $CONTAINER_ID"
-                        docker stop "$CONTAINER_ID"
+                        sudo docker stop "$CONTAINER_ID"
                     else
                         echo "No existing container found on port ${HOST_PORT}"
                     fi
