@@ -112,9 +112,11 @@ stage('Deploy and Run Python Web Application') {
                         -i "$SSH_KEY" \
                         $SSH_USER@$CLIENT_PRIVATEIP << EOF
 
-                    IMAGE="${IMAGE_NAME_REPO}"
-                    echo "Pulling image: $IMAGE_NAME_REPO"
-                    sudo docker pull "$IMAGE_NAME_REPO"
+                    hostname
+					whoami
+					pwd
+					echo "Pulling image: ${IMAGE_NAME_REPO}
+                    sudo docker pull ${IMAGE_NAME_REPO}
 
                     CONTAINER_ID=$(sudo docker ps -q --filter "publish=${HOST_PORT}")
 
@@ -129,7 +131,7 @@ stage('Deploy and Run Python Web Application') {
                     sudo docker run -d \
                         --name ${LOCAL_IMAGE_NAME}-V${BUILD_NUMBER} \
                         -p ${HOST_PORT}:${DOCKER_PORT} \
-                        "$IMAGE"
+                        ${IMAGE_NAME_REPO}
 
                     echo "Deployment completed successfully."
                     EOF
