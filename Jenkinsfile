@@ -19,6 +19,8 @@ pipeline{
                sh 'hostname'
 			   sh 'whoami'
 			   sh 'pwd'
+               sh 'cd Scripts/'
+               sh 'ls -laht'
             }
         }	
                 
