@@ -111,31 +111,7 @@ stage('Deploy and Run Python Web Application') {
                     ssh -o StrictHostKeyChecking=no \
                         -o UserKnownHostsFile=/dev/null \
                         -i "$SSH_KEY" \
-                        $SSH_USER@$CLIENT_PRIVATEIP <<EOF
-
-                    hostname
-					whoami
-					pwd
-					echo "Pulling image: ${IMAGE_NAME_REPO}"
-                    sudo docker pull ${IMAGE_NAME_REPO}
-                    sudo docker ps -q --filter "publish=${HOST_PORT}"
-                    read CONTAINER_ID <<< "\\$(sudo docker ps -q --filter publish=${HOST_PORT})"
-                    echo $CONTAINER_ID
-                    if [[ sudo docker ps -q --filter "publish=${HOST_PORT}" | grep -q ]] ;then 
-                        echo "Stopping container running on port ${HOST_PORT}: $CONTAINER_ID"
-                        sudo docker stop $(sudo docker ps -q --filter "publish=${HOST_PORT}")
-                    else
-                        echo "No existing container found on port ${HOST_PORT}"
-                    fi
-
-                    echo "Starting new container..."
-                    sudo docker run -d \
-                        --name ${LOCAL_IMAGE_NAME}-V${BUILD_NUMBER} \
-                        -p ${HOST_PORT}:${DOCKER_PORT} \
-                        ${IMAGE_NAME_REPO}
-
-                    echo "Deployment completed successfully."
-                EOF
+                        $SSH_USER@$CLIENT_PRIVATEIP "Scripts/deploy.sh $IMAGE_NAME_REPO $HOST_PORT $LOCAL_IMAGE_NAME $BUILD_NUMBER $DOCKER_PORT"
                 '''
             }
         }
