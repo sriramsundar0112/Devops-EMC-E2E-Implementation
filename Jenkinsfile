@@ -1,14 +1,14 @@
 pipeline{
 
     agent any
-    environment
+    parameters 
     {
-       LOCAL_IMAGE_NAME='python-webapp'
-       DOCKER_HUB_REPO='jenkins-docker-python-webapp'
-       DOCKER_PORT=8000
-       HOST_PORT=8082
-       CLIENT_PRIVATEIP='172.31.65.173'
-     
+       string(name: 'LOCAL_IMAGE_NAME', defaultValue: 'python-webapp', description: 'Name of the Docker Image')
+       string(name: 'DOCKER_HUB_REPO', defaultValue: 'jenkins-docker-python-webapp', description: 'Name of the Docker Hub Repository')
+       string(name: 'DOCKER_PORT', defaultValue: '8000', description: 'Docker Port on which application will run')
+       string(name: 'HOST_PORT', defaultValue: '8082', description: 'Host Port on which application will be mapped with Docker Port')
+       string(name: 'CLIENT_PRIVATEIP', defaultValue: '172.31.65.173', description: 'Client IP on which the docker application will be deployed ')
+          
     }
 
     stages{
@@ -67,7 +67,7 @@ pipeline{
         {
             steps
             {
-               sh 'docker build -t $LOCAL_IMAGE_NAME:V$BUILD_NUMBER .'
+               sh 'docker build -t ${params.LOCAL_IMAGE_NAME}:V$BUILD_NUMBER .'
             }
         }
 
@@ -82,9 +82,9 @@ pipeline{
                             passwordVariable: 'DCKR_PASS'                // Name of the environment variable for the password
                         )
                     ]) {
-                      env.IMAGE_NAME_REPO="$DCKR_USER/$DOCKER_HUB_REPO:V$BUILD_NUMBER"
+                      env.IMAGE_NAME_REPO="$DCKR_USER/${params.DOCKER_HUB_REPO}:V$BUILD_NUMBER"
                       sh '''
-                docker tag $LOCAL_IMAGE_NAME:V$BUILD_NUMBER $IMAGE_NAME_REPO
+                docker tag ${params.LOCAL_IMAGE_NAME}:V$BUILD_NUMBER $IMAGE_NAME_REPO
                 docker push $IMAGE_NAME_REPO
                 '''
                     }
@@ -108,13 +108,13 @@ stage('Deploy and Run Python Web Application') {
                 sh '''
                     set -e
 
-                    echo "Connecting through SSH with IP: $CLIENT_PRIVATEIP ..."
+                    echo "Connecting through SSH with IP: ${params.CLIENT_PRIVATEIP} ..."
 
                     ssh -o StrictHostKeyChecking=no \\
                         -o UserKnownHostsFile=/dev/null \\
                         -i "$SSH_KEY" \\
-                        $SSH_USER@$CLIENT_PRIVATEIP \\
-                        "bash -s $IMAGE_NAME_REPO $HOST_PORT $LOCAL_IMAGE_NAME $BUILD_NUMBER $DOCKER_PORT" \\
+                        $SSH_USER@${params.CLIENT_PRIVATEIP} \\
+                        "bash -s $IMAGE_NAME_REPO ${params.HOST_PORT} ${params.LOCAL_IMAGE_NAME} $BUILD_NUMBER ${params.DOCKER_PORT}" \\
                          < Scripts/deploy.sh
                 '''
             }
