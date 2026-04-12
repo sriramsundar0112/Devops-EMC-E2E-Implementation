@@ -1,13 +1,14 @@
 pipeline{
 
     agent any
-    environment
+    parameters 
     {
-       LOCAL_IMAGE_NAME='python-webapp'
-       DOCKER_HUB_REPO='jenkins-docker-python-webapp'
-       DOCKER_PORT=8000
-       HOST_PORT=8081
-     
+       string(name: 'LOCAL_IMAGE_NAME', defaultValue: 'python-webapp', description: 'Name of the Docker Image')
+       string(name: 'DOCKER_HUB_REPO', defaultValue: 'jenkins-docker-python-webapp', description: 'Name of the Docker Hub Repository')
+       string(name: 'DOCKER_PORT', defaultValue: '8000', description: 'Docker Port on which application will run')
+       string(name: 'HOST_PORT', defaultValue: '8082', description: 'Host Port on which application will be mapped with Docker Port')
+       string(name: 'CLIENT_PRIVATEIP', defaultValue: '172.31.65.173', description: 'Client IP on which the docker application will be deployed ')
+          
     }
 
     stages{
@@ -18,6 +19,8 @@ pipeline{
                sh 'hostname'
 			   sh 'whoami'
 			   sh 'pwd'
+               sh 'cd Scripts/'
+               sh 'ls -laht'
             }
         }	
                 
@@ -25,14 +28,14 @@ pipeline{
 			stage('SonarQube Code Analysis'){
 		steps{
             withSonarQubeEnv('sonarserver') {
-                sh '''
-                     /usr/lib/sonarscanner/bin/sonar-scanner \
+                sh """
+                     /opt/sonar-scanner-8.0.1.6346-linux-x64/bin/sonar-scanner \
                      -Dsonar.projectBaseDir=. \
                      -Dsonar.sources=app \
                      -Dsonar.projectKey=sonarqube-Jenkins:$BUILD_NUMBER-$BUILD_ID \
                      -Dsonar.projectName=sonarqube-jenkins:$BUILD_NUMBER-$BUILD_ID \
 
-                    '''
+                    """
               }
             }
                 
@@ -49,11 +52,11 @@ pipeline{
                         )
                     ]) {
                         // The environment variables EXT_USER and EXT_PASS are available here
-                        sh '''
+                        sh """
                             echo "Connecting with user: $DCKR_USER"
                             echo "$DCKR_PASS" | docker login -u $DCKR_USER --password-stdin
                         
-                        '''
+                        """
                     }
                 }
             }
@@ -64,7 +67,7 @@ pipeline{
         {
             steps
             {
-               sh 'docker build -t $LOCAL_IMAGE_NAME:V$BUILD_NUMBER .'
+               sh """docker build -t ${params.LOCAL_IMAGE_NAME}:V$BUILD_NUMBER ."""
             }
         }
 
@@ -79,10 +82,11 @@ pipeline{
                             passwordVariable: 'DCKR_PASS'                // Name of the environment variable for the password
                         )
                     ]) {
-                      sh '''
-                docker tag $LOCAL_IMAGE_NAME:V$BUILD_NUMBER $DCKR_USER/$DOCKER_HUB_REPO:V$BUILD_NUMBER
-                docker push $DCKR_USER/$DOCKER_HUB_REPO:V$BUILD_NUMBER
-                '''
+                      env.IMAGE_NAME_REPO="$DCKR_USER/${params.DOCKER_HUB_REPO}:V$BUILD_NUMBER"
+                      sh """
+                docker tag ${params.LOCAL_IMAGE_NAME}:V$BUILD_NUMBER $IMAGE_NAME_REPO
+                docker push $IMAGE_NAME_REPO
+                """
                     }
                 }
                 
@@ -90,21 +94,35 @@ pipeline{
             }
             }
 
-            stage('Deploy and Run Python Web Application')
+stage('Deploy and Run Python Web Application') {
+    steps {
+        script {
+            withCredentials([
+                sshUserPrivateKey(
+                    credentialsId: 'Amazon-EC2-Client',
+                    keyFileVariable: 'SSH_KEY',
+                    usernameVariable: 'SSH_USER'
+                )
+            ]) 
             {
-                steps
-                {
-                    sh '''
-                    CONTAINER_ID=0
-                    CONTAINER_ID= $(docker ps -q --filter "publish=$HOST_PORT")
-                    if [ "$CONTAINER_ID" -ne 0];then
-                        docker stop $CONTAINER_ID
-                    fi
-                    docker run -d --name $LOCAL_IMAGE_NAME-V$BUILD_NUMBER --restart unless-stopped -p $HOST_PORT:$DOCKER_PORT $LOCAL_IMAGE_NAME:V$BUILD_NUMBER 
-                    '''
-                }
+                sh """
+                    set -e
+
+                    echo "Connecting through SSH with IP: ${params.CLIENT_PRIVATEIP} ..."
+
+                    ssh -o StrictHostKeyChecking=no \\
+                        -o UserKnownHostsFile=/dev/null \\
+                        -i "$SSH_KEY" \\
+                        $SSH_USER@${params.CLIENT_PRIVATEIP} \\
+                        "bash -s $IMAGE_NAME_REPO ${params.HOST_PORT} ${params.LOCAL_IMAGE_NAME} $BUILD_NUMBER ${params.DOCKER_PORT}" \\
+                         < Scripts/deploy.sh
+                """
             }
-           
+        }
+    }
+}
+
+            
     }
 
     
