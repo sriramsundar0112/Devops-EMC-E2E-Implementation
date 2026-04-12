@@ -28,14 +28,14 @@ pipeline{
 			stage('SonarQube Code Analysis'){
 		steps{
             withSonarQubeEnv('sonarserver') {
-                sh '''
+                sh """
                      /opt/sonar-scanner-8.0.1.6346-linux-x64/bin/sonar-scanner \
                      -Dsonar.projectBaseDir=. \
                      -Dsonar.sources=app \
                      -Dsonar.projectKey=sonarqube-Jenkins:$BUILD_NUMBER-$BUILD_ID \
                      -Dsonar.projectName=sonarqube-jenkins:$BUILD_NUMBER-$BUILD_ID \
 
-                    '''
+                    """
               }
             }
                 
@@ -52,11 +52,11 @@ pipeline{
                         )
                     ]) {
                         // The environment variables EXT_USER and EXT_PASS are available here
-                        sh '''
+                        sh """
                             echo "Connecting with user: $DCKR_USER"
                             echo "$DCKR_PASS" | docker login -u $DCKR_USER --password-stdin
                         
-                        '''
+                        """
                     }
                 }
             }
@@ -67,7 +67,7 @@ pipeline{
         {
             steps
             {
-               sh 'docker build -t ${params.LOCAL_IMAGE_NAME}:V$BUILD_NUMBER .'
+               sh """docker build -t ${params.LOCAL_IMAGE_NAME}:V$BUILD_NUMBER ."""
             }
         }
 
@@ -83,10 +83,10 @@ pipeline{
                         )
                     ]) {
                       env.IMAGE_NAME_REPO="$DCKR_USER/${params.DOCKER_HUB_REPO}:V$BUILD_NUMBER"
-                      sh '''
+                      sh """
                 docker tag ${params.LOCAL_IMAGE_NAME}:V$BUILD_NUMBER $IMAGE_NAME_REPO
                 docker push $IMAGE_NAME_REPO
-                '''
+                """
                     }
                 }
                 
@@ -105,7 +105,7 @@ stage('Deploy and Run Python Web Application') {
                 )
             ]) 
             {
-                sh '''
+                sh """
                     set -e
 
                     echo "Connecting through SSH with IP: ${params.CLIENT_PRIVATEIP} ..."
@@ -116,7 +116,7 @@ stage('Deploy and Run Python Web Application') {
                         $SSH_USER@${params.CLIENT_PRIVATEIP} \\
                         "bash -s $IMAGE_NAME_REPO ${params.HOST_PORT} ${params.LOCAL_IMAGE_NAME} $BUILD_NUMBER ${params.DOCKER_PORT}" \\
                          < Scripts/deploy.sh
-                '''
+                """
             }
         }
     }
