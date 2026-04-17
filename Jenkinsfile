@@ -25,7 +25,7 @@ pipeline{
         }	
                 
 		
-			stage('SonarQube Code Analysis'){
+		stage('SonarQube Code Analysis'){
 		steps{
             withSonarQubeEnv('sonarserver') {
                 sh """
@@ -40,7 +40,16 @@ pipeline{
             }
                 
             }
+        
+        stage('Sonar Qube Quality Gate Check'){
 
+            steps {
+                timeout(time:5,unit: 'MINUTES'){
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+        
         stage('Connect with DockerHub using Valid Credentials') {
             steps {
                 script {
