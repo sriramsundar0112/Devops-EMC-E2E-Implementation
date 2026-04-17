@@ -19,8 +19,6 @@ pipeline{
                sh 'hostname'
 			   sh 'whoami'
 			   sh 'pwd'
-               sh 'cd Scripts/'
-               sh 'ls -laht'
             }
         }	
                 
@@ -31,7 +29,7 @@ pipeline{
                 sh """
                      /opt/sonar-scanner-8.0.1.6346-linux-x64/bin/sonar-scanner \
                      -Dsonar.projectBaseDir=. \
-                     -Dsonar.sources=app \
+                     -Dsonar.sources=. \
                      -Dsonar.projectKey=sonarqube-Jenkins:$BUILD_NUMBER-$BUILD_ID \
                      -Dsonar.projectName=sonarqube-jenkins:$BUILD_NUMBER-$BUILD_ID \
 
